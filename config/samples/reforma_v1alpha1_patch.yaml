@@ -1,0 +1,32 @@
+apiVersion: reforma.prosimcorp.com/v1alpha1
+kind: Patch
+metadata:
+  name: patch-sample
+spec:
+  target:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ingress-nginx-controller
+    namespace: ingress-nginx
+
+  patchType: application/json-patch+json
+
+  template: |
+    {{- $target := (index . 0) -}}
+
+    {{/* Get the original flags of the target */}}
+    {{- $target_args := (index $target.spec.template.spec.containers 0).args -}}
+
+    {{/* Flags for all the cloud providers */}}
+    {{- $target_args = append $target_args "--tcp-services-configmap=gitlab/ingress-nginx-tcp-services" -}}
+
+    - op: replace
+      path: /spec/template/spec/containers/0/args
+      value:
+        {{- $target_args | uniq | toYaml | nindent 4 -}}
+
+  sources:
+    - apiVersion: v1
+      kind: Secret
+      name: manager-service-cert
+      namespace: operator

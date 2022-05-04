@@ -1,0 +1,16 @@
+domain: prosimcorp.com
+layout:
+- go.kubebuilder.io/v3
+projectName: reforma
+repo: prosimcorp.com/reforma
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: prosimcorp.com
+  group: reforma
+  kind: Patch
+  path: prosimcorp.com/reforma/api/v1alpha1
+  version: v1alpha1
+version: "3"
