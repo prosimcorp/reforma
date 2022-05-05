@@ -12,12 +12,31 @@ import (
 	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
 )
 
-// GetSources return a list of Unstructured objects with the content of the sources
-func (r *PatchReconciler) GetSources(*reformav1alpha1.Patch) (sources unstructured.UnstructuredList, err error) {
+// GetSources return a pointer to a list of Unstructured objects with the content of the sources
+func (r *PatchReconciler) GetSources(ctx context.Context, patch *reformav1alpha1.Patch) (sources *unstructured.UnstructuredList, err error) {
+
+	sources = &unstructured.UnstructuredList{}
+
+	sourceObject := &unstructured.Unstructured{}
+	for _, sourceReference := range patch.Spec.Sources {
+		sourceObject.SetGroupVersionKind(sourceReference.GroupVersionKind())
+
+		err = r.Get(ctx, client.ObjectKey{
+			Namespace: sourceReference.Namespace,
+			Name:      sourceReference.Name,
+		}, sourceObject)
+
+		if err != nil {
+			return sources, err
+		}
+
+		sources.Items = append(sources.Items, *sourceObject)
+	}
+
 	return sources, err
 }
 
-// GetTarget returns a pointer to an unstructured object with the content of the target
+// GetTarget returns a pointer to an Unstructured object with the content of the target
 func (r *PatchReconciler) GetTarget(ctx context.Context, patch *reformav1alpha1.Patch) (target *unstructured.Unstructured, err error) {
 
 	// Get the target manifest
