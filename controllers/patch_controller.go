@@ -30,14 +30,14 @@ import (
 )
 
 const (
-	scheduleSynchronization         = "Schedule synchronization in: %s"
-	patchNotFoundError              = "Patch resource not found. Ignoring since object must be deleted."
-	patchRetrievalError             = "Error getting the Patch from the cluster"
-	targetsDeletionError            = "Unable to delete the targets"
-	patchFinalizersUpdateError      = "Failed to update finalizer of Patch: %s"
-	patchConditionUpdateError       = "Failed to update the condition on Patch: %s"
-	patchSyncTimeRetrievalError     = "Can not get synchronization time from the Patch: %s"
-	updateTargetsError              = "Can not update the targets for the Patch: %s"
+	scheduleSynchronization     = "Schedule synchronization in: %s"
+	patchNotFoundError          = "Patch resource not found. Ignoring since object must be deleted."
+	patchRetrievalError         = "Error getting the Patch from the cluster"
+	targetsDeletionError        = "Unable to delete the targets"
+	patchFinalizersUpdateError  = "Failed to update finalizer of Patch: %s"
+	patchConditionUpdateError   = "Failed to update the condition on Patch: %s"
+	patchSyncTimeRetrievalError = "Can not get synchronization time from the Patch: %s"
+	updateTargetsError          = "Can not update the targets for the Patch: %s"
 
 	patchFinalizer = "reforma.prosimcorp.com/finalizer"
 )

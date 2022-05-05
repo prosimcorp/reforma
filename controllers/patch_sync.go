@@ -1,38 +1,44 @@
 package controllers
 
 import (
+	"context"
 	"log"
 	"os"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	tmpl "text/template"
 
-	corev1 "k8s.io/api/core/v1"
+	"github.com/Masterminds/sprig"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
-	"github.com/Masterminds/sprig"
 )
 
-// CheckResource check the existence of a resource given by the Patch spec
-func (r *PatchReconciler) CheckResource (reference corev1.ObjectReference) (err error) {
-	return err
-}
-
 // GetSources return a list of Unstructured objects with the content of the sources
-func (r *PatchReconciler) GetSources (*reformav1alpha1.Patch) (sources unstructured.UnstructuredList, err error) {
+func (r *PatchReconciler) GetSources(*reformav1alpha1.Patch) (sources unstructured.UnstructuredList, err error) {
 	return sources, err
 }
 
-// GetTarget return an unstructured object with the content of the target
-func (r *PatchReconciler) GetTarget () (target unstructured.Unstructured, err error) {
+// GetTarget returns a pointer to an unstructured object with the content of the target
+func (r *PatchReconciler) GetTarget(ctx context.Context, patch *reformav1alpha1.Patch) (target *unstructured.Unstructured, err error) {
+
+	// Get the target manifest
+	target = &unstructured.Unstructured{}
+	target.SetGroupVersionKind(patch.Spec.Target.GroupVersionKind())
+
+	err = r.Get(ctx, client.ObjectKey{
+		Namespace: patch.Spec.Target.Namespace,
+		Name:      patch.Spec.Target.Name,
+	}, target)
+
 	return target, err
 }
 
 // JoinResources return a list of unstructured objects appending the target resource to the sources list
-func (r *PatchReconciler) JoinResources (sources unstructured.UnstructuredList, target unstructured.Unstructured) (resources unstructured.UnstructuredList, err error) {
+func (r *PatchReconciler) JoinResources(sources unstructured.UnstructuredList, target unstructured.Unstructured) (resources unstructured.UnstructuredList, err error) {
 	return resources, err
 }
 
 // ParseTemplate ... TODO
-func (r *PatchReconciler) ParseTemplate (template string, resources unstructured.UnstructuredList) (err error) {
+func (r *PatchReconciler) ParseTemplate(template string, resources unstructured.UnstructuredList) (err error) {
 
 	sprigFuncs := sprig.TxtFuncMap()
 

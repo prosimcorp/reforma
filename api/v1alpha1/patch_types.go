@@ -22,26 +22,15 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-type PatchSourceSpec struct {
-	corev1.ObjectReference
-}
-
-type PatchTargetSpec struct {
-	corev1.ObjectReference
-}
-
 // PatchSpec defines the desired state of Patch
 type PatchSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Sources []PatchSourceSpec `json:"sources"`
-	Target PatchTargetSpec `json:"target"`
-	Template string `json:"template"`
-	PatchType types.PatchType `json:"patchType"`
+	Sources   []corev1.ObjectReference `json:"sources"`
+	Target    corev1.ObjectReference   `json:"target"`
+	Template  string                   `json:"template"`
+	PatchType types.PatchType          `json:"patchType"`
 }
 
 // PatchStatus defines the observed state of Patch
