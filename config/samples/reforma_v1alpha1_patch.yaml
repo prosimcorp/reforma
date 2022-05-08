@@ -3,30 +3,40 @@ kind: Patch
 metadata:
   name: patch-sample
 spec:
+  #periodical: true
+  #synchronizationTime: 10s
+
+  sources:
+    - apiVersion: v1
+      kind: ConfigMap
+      name: cluster-info-dos
+      namespace: default
+    - apiVersion: v1
+      kind: ConfigMap
+      name: cluster-info-tres
+      namespace: default
+
   target:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: ingress-nginx-controller
-    namespace: ingress-nginx
+    apiVersion: v1
+    kind: ConfigMap
+    name: cluster-info
+    namespace: default
 
   patchType: application/json-patch+json
 
   template: |
     {{- $target := (index . 0) -}}
+    {{- $source := (index . 1) -}}
 
     {{/* Get the original flags of the target */}}
-    {{- $target_args := (index $target.spec.template.spec.containers 0).args -}}
+    {{/* - $target_args := (index $target.spec.template.spec.containers 0).args - */}}
 
     {{/* Flags for all the cloud providers */}}
-    {{- $target_args = append $target_args "--tcp-services-configmap=gitlab/ingress-nginx-tcp-services" -}}
+    {{/* - $target_args = append $target_args "--tcp-services-configmap=gitlab/ingress-nginx-tcp-services" - */}}
 
     - op: replace
       path: /spec/template/spec/containers/0/args
       value:
-        {{- $target_args | uniq | toYaml | nindent 4 -}}
+        {{- $source.metadata.name -}}
+        {{/* - $target_args | uniq | toYaml | nindent 4 - */}}
 
-  sources:
-    - apiVersion: v1
-      kind: Secret
-      name: manager-service-cert
-      namespace: operator

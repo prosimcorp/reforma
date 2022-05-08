@@ -84,13 +84,13 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 			//	LogInfof(ctx, targetsDeletionError)
 			//	return result, err
 			//}
-			//
-			//// Remove the finalizers on Patch CR
-			//controllerutil.RemoveFinalizer(patchManifest, patchFinalizer)
-			//err = r.Update(ctx, patchManifest)
-			//if err != nil {
-			//	LogInfof(ctx, patchFinalizersUpdateError, req.Name)
-			//}
+
+			// Remove the finalizers on Patch CR
+			controllerutil.RemoveFinalizer(patchManifest, patchFinalizer)
+			err = r.Update(ctx, patchManifest)
+			if err != nil {
+				LogInfof(ctx, patchFinalizersUpdateError, req.Name)
+			}
 		}
 		result = ctrl.Result{}
 		err = nil
@@ -131,6 +131,13 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 	//
 	//	return result, err
 	//}
+
+	// Temporary dummy execution (TODO)
+	err = r.PatchTarget(ctx, patchManifest)
+	if err != nil {
+		LogInfof(ctx, "shegamos: %s", patchManifest.Name)
+		return result, err
+	}
 
 	// 8. Success, update the status
 	r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeSourceSynced,
