@@ -3,14 +3,31 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/Masterminds/sprig"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
 	"log"
 	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	tmpl "text/template"
+)
+
+const (
+	// ErrorInvalidPatchTypeMessage error message for invalid values on 'patchType' parameter
+	ErrorInvalidPatchTypeMessage = "PatchType: invalid value. Choose one of the following: %s"
+)
+
+var (
+	// AvailabePatchTypes store a list with all available values for patchTypes parameter
+	AvailabePatchTypes = []string{
+		string(types.JSONPatchType),
+		string(types.MergePatchType),
+		string(types.StrategicMergePatchType),
+		string(types.ApplyPatchType),
+	}
 )
 
 // GetSources return a pointer to a list of Unstructured objects with the content of the sources
@@ -125,6 +142,21 @@ func (r *PatchReconciler) GetFunctionsMap() tmpl.FuncMap {
 	return f
 }
 
+// GetPatchType return the patchType string from a Patch CR
+func (r *PatchReconciler) GetPatchType(ctx context.Context, patch *reformav1alpha1.Patch) (patchType string, err error) {
+
+	patchType = string(patch.Spec.PatchType)
+
+	for _, AvailabePatchType := range AvailabePatchTypes {
+		if patchType == AvailabePatchType {
+			return patchType, nil
+		}
+	}
+
+	// TODO Change the status conditions
+	return patchType, fmt.Errorf(ErrorInvalidPatchTypeMessage, strings.Join(AvailabePatchTypes, ", "))
+}
+
 // GetPatch return the patch string already prepared to call the Kubernetes API
 func (r *PatchReconciler) GetPatch(ctx context.Context, patch *reformav1alpha1.Patch) (parsedPatch string, err error) {
 
@@ -180,6 +212,15 @@ func (r *PatchReconciler) PatchTarget(ctx context.Context, patch *reformav1alpha
 	//log.Print("TARGET-----------------------")
 	//log.Print(target)
 	//log.Print("------------------------------")
+
+	patchType, err := r.GetPatchType(ctx, patch)
+
+	if err != nil {
+		log.Print("GetPatchType ------------------------------")
+		log.Print(patchType)
+		log.Print(err)
+		log.Print("GetPatchType END ------------------------------")
+	}
 
 	parsedPatch, err := r.GetPatch(ctx, patch)
 
