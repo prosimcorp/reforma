@@ -129,5 +129,6 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 func (r *PatchReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&reformav1alpha1.Patch{}).
+		//Watches(&source.Channel{Source: r.GetStatusChangeChannel()}, &handler.EnqueueRequestForObject{}).
 		Complete(r)
 }
