@@ -18,8 +18,8 @@ package controllers
 
 import (
 	"context"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -37,7 +37,7 @@ const (
 	patchFinalizersUpdateError  = "Failed to update finalizer of Patch: %s"
 	patchConditionUpdateError   = "Failed to update the condition on Patch: %s"
 	patchSyncTimeRetrievalError = "Can not get synchronization time from the Patch: %s"
-	updateTargetsError          = "Can not update the targets for the Patch: %s"
+	patchTargetError            = "Can not patch the target for the Patch: %s"
 
 	patchFinalizer = "reforma.prosimcorp.com/finalizer"
 )
@@ -78,13 +78,6 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 	// 3. Check if the Patch instance is marked to be deleted: indicated by the deletion timestamp being set
 	if !patchManifest.DeletionTimestamp.IsZero() {
 		if controllerutil.ContainsFinalizer(patchManifest, patchFinalizer) {
-			//// Delete all created targets
-			//err = r.DeleteTargets(ctx, patchManifest)
-			//if err != nil {
-			//	LogInfof(ctx, targetsDeletionError)
-			//	return result, err
-			//}
-
 			// Remove the finalizers on Patch CR
 			controllerutil.RemoveFinalizer(patchManifest, patchFinalizer)
 			err = r.Update(ctx, patchManifest)
@@ -114,36 +107,18 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 		}
 	}()
 
-	// 6. Schedule periodical request
-	//RequeueTime, err := r.GetSynchronizationTime(patchManifest)
-	//if err != nil {
-	//	LogInfof(ctx, patchSyncTimeRetrievalError, patchManifest.Name)
-	//	return result, err
-	//}
-	//result = ctrl.Result{
-	//	RequeueAfter: RequeueTime,
-	//}
-
-	// 7. The Patch CR already exist: manage the update
-	//err = r.UpdateTargets(ctx, patchManifest)
-	//if err != nil {
-	//	LogInfof(ctx, updateTargetsError, patchManifest.Name)
-	//
-	//	return result, err
-	//}
-
-	// Temporary dummy execution (TODO)
+	// 6. The Patch CR already exist: manage the update
 	err = r.PatchTarget(ctx, patchManifest)
 	if err != nil {
-		LogInfof(ctx, "shegamos: %s", patchManifest.Name)
+		LogInfof(ctx, patchTargetError, patchManifest.Name)
 		return result, err
 	}
 
-	// 8. Success, update the status
-	r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeSourceSynced,
+	// 7. Success, update the status
+	r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
 		metav1.ConditionTrue,
-		ConditionReasonSourceSynced,
-		ConditionReasonSourceSyncedMessage,
+		ConditionReasonTargetPatched,
+		ConditionReasonTargetPatchedMessage,
 	))
 
 	LogInfof(ctx, scheduleSynchronization, result.RequeueAfter.String())

@@ -4,15 +4,20 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/Masterminds/sprig"
-	"gopkg.in/yaml.v3"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/types"
 	"log"
-	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"strings"
 	tmpl "text/template"
+
+	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
+
+
+	"github.com/Masterminds/sprig"
+	"gopkg.in/yaml.v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	yamlsigs "sigs.k8s.io/yaml"
 )
 
 const (
@@ -22,22 +27,29 @@ const (
 
 var (
 	// AvailabePatchTypes store a list with all available values for patchTypes parameter
-	AvailabePatchTypes = []string{
-		string(types.JSONPatchType),
-		string(types.MergePatchType),
-		string(types.StrategicMergePatchType),
-		string(types.ApplyPatchType),
+	AvailabePatchTypes = []types.PatchType{
+		types.JSONPatchType,
+		types.MergePatchType,
+		types.StrategicMergePatchType,
+		types.ApplyPatchType,
 	}
 )
 
-// GetSources return a pointer to a list of Unstructured objects with the content of the sources
-func (r *PatchReconciler) GetSources(ctx context.Context, patch *reformav1alpha1.Patch) (sources *unstructured.UnstructuredList, err error) {
+// GetPatchTypesString return a list of all available patch types as strings for later convenience
+func GetPatchTypesString() (types []string) {
+	for _, str := range AvailabePatchTypes {
+		types = append(types, string(str))
+	}
+	return types
+}
 
-	sources = &unstructured.UnstructuredList{}
+// addSources fill the resources list from input parameters with the content of the sources
+func (r *PatchReconciler) addSources(ctx context.Context, patchManifest *reformav1alpha1.Patch, resources *[]map[string]interface{}) (err error) {
 
-	// Get the source content, one by one
+	// Fill the sources content, one by one
 	sourceObject := &unstructured.Unstructured{}
-	for _, sourceReference := range patch.Spec.Sources {
+
+	for _, sourceReference := range patchManifest.Spec.Sources {
 		sourceObject.SetGroupVersionKind(sourceReference.GroupVersionKind())
 
 		err = r.Get(ctx, client.ObjectKey{
@@ -46,69 +58,59 @@ func (r *PatchReconciler) GetSources(ctx context.Context, patch *reformav1alpha1
 		}, sourceObject)
 
 		if err != nil {
-			return sources, err
+			return err
 		}
 
-		sources.Items = append(sources.Items, *sourceObject)
+		*resources = append(*resources, sourceObject.Object)
 	}
 
-	return sources, err
+	return err
 }
 
-// GetTarget returns a pointer to an Unstructured object with the content of the target
-func (r *PatchReconciler) GetTarget(ctx context.Context, patch *reformav1alpha1.Patch) (target *unstructured.Unstructured, err error) {
+// addTarget fill the resources list from input parameters with the target object content
+func (r *PatchReconciler) addTarget(ctx context.Context, patchManifest *reformav1alpha1.Patch, resources *[]map[string]interface{}) (err error) {
 
 	// Get the target manifest
-	target = &unstructured.Unstructured{}
-	target.SetGroupVersionKind(patch.Spec.Target.GroupVersionKind())
+	target := &unstructured.Unstructured{}
+	target.SetGroupVersionKind(patchManifest.Spec.Target.GroupVersionKind())
 
 	err = r.Get(ctx, client.ObjectKey{
-		Namespace: patch.Spec.Target.Namespace,
-		Name:      patch.Spec.Target.Name,
+		Namespace: patchManifest.Spec.Target.Namespace,
+		Name:      patchManifest.Spec.Target.Name,
 	}, target)
-
-	return target, err
-}
-
-// GetResources return an UnstructuredList whose items are the target and the sources
-func (r *PatchReconciler) getResources(ctx context.Context, patch *reformav1alpha1.Patch) (resources *unstructured.UnstructuredList, err error) {
-
-	resources = &unstructured.UnstructuredList{}
-
-	sources, err := r.GetSources(ctx, patch)
 	if err != nil {
-		// TODO: Update the CR status
-		return resources, err
+		return err
 	}
 
-	target, err := r.GetTarget(ctx, patch)
-	if err != nil {
-		// TODO: Update the CR status
-		return resources, err
-	}
+	*resources = append(*resources, target.Object)
 
-	resources.Items = append(resources.Items, *target)
-	resources.Items = append(resources.Items, sources.Items...)
-
-	return resources, err
+	return err
 }
 
 // GetResources return a JSON compatible list of objects with the target and the sources
-func (r *PatchReconciler) GetResources(ctx context.Context, patch *reformav1alpha1.Patch) (parsedResources []map[string]interface{}, err error) {
+func (r *PatchReconciler) GetResources(ctx context.Context, patchManifest *reformav1alpha1.Patch) (resources []map[string]interface{}, err error) {
 
-	resources, err := r.getResources(ctx, patch)
-
+	// Fill the resources list with the target
+	err = r.addTarget(ctx, patchManifest, &resources)
 	if err != nil {
-		// TODO: Update the CR status
-		return parsedResources, err
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
+			metav1.ConditionFalse,
+			ConditionReasonTargetNotFound,
+			ConditionReasonTargetNotFoundMessage,
+		))
 	}
 
-	// Transform the UnstructuredList into a list of JSON compatible objects
-	for _, resource := range resources.Items {
-		parsedResources = append(parsedResources, resource.Object)
+	// Fill the resources list with the sources
+	err = r.addSources(ctx, patchManifest, &resources)
+	if err != nil {
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
+			metav1.ConditionFalse,
+			ConditionReasonSourceNotFound,
+			ConditionReasonSourceNotFoundMessage,
+		))
 	}
 
-	return parsedResources, err
+	return resources, err
 }
 
 // toYAML takes an interface, marshals it to yaml, and returns a string. It will
@@ -142,38 +144,45 @@ func (r *PatchReconciler) GetFunctionsMap() tmpl.FuncMap {
 	return f
 }
 
-// GetPatchType return the patchType string from a Patch CR
-func (r *PatchReconciler) GetPatchType(ctx context.Context, patch *reformav1alpha1.Patch) (patchType string, err error) {
-
-	patchType = string(patch.Spec.PatchType)
+// CheckPatchType check if the 'patchType' in the Path CR is available
+func (r *PatchReconciler) CheckPatchType(patchManifest *reformav1alpha1.Patch) (err error) {
 
 	for _, AvailabePatchType := range AvailabePatchTypes {
-		if patchType == AvailabePatchType {
-			return patchType, nil
+		if AvailabePatchType == patchManifest.Spec.PatchType {
+			return err
 		}
 	}
 
-	// TODO Change the status conditions
-	return patchType, fmt.Errorf(ErrorInvalidPatchTypeMessage, strings.Join(AvailabePatchTypes, ", "))
+	r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
+		metav1.ConditionFalse,
+		ConditionReasonInvalidPatchType,
+		ConditionReasonInvalidPatchTypeMessage,
+	))
+	err = fmt.Errorf(ErrorInvalidPatchTypeMessage, strings.Join(GetPatchTypesString(), ", "))
+
+	return err
 }
 
 // GetPatch return the patch string already prepared to call the Kubernetes API
-func (r *PatchReconciler) GetPatch(ctx context.Context, patch *reformav1alpha1.Patch) (parsedPatch string, err error) {
+func (r *PatchReconciler) GetPatch(ctx context.Context, patchManifest *reformav1alpha1.Patch) (parsedPatch string, err error) {
 
 	// Map useful sprig functions to give superpower to the users
 	templateFunctionsMap := r.GetFunctionsMap()
 
 	// Get the resources from a Patch CR
-	resources, err := r.GetResources(ctx, patch)
+	resources, err := r.GetResources(ctx, patchManifest)
 	if err != nil {
-		// TODO Change the status conditions here or inside the child
 		return parsedPatch, err
 	}
 
 	// Create a Template object from the given string
-	template, err := tmpl.New("main").Funcs(templateFunctionsMap).Parse(patch.Spec.Template)
+	template, err := tmpl.New("main").Funcs(templateFunctionsMap).Parse(patchManifest.Spec.Template)
 	if err != nil {
-		// TODO Change the status conditions
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeTemplateSucceed,
+			metav1.ConditionFalse,
+			ConditionReasonTemplateParsingFailed,
+			fmt.Sprintf(ConditionReasonTemplateParsingFailedMessage, err.Error()),
+		))
 		return parsedPatch, err
 	}
 
@@ -182,57 +191,67 @@ func (r *PatchReconciler) GetPatch(ctx context.Context, patch *reformav1alpha1.P
 
 	err = template.Execute(buffer, resources)
 	if err != nil {
-		// TODO Change the status conditions
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeTemplateSucceed,
+			metav1.ConditionFalse,
+			ConditionReasonTemplateExecutionFailed,
+			fmt.Sprintf(ConditionReasonTemplateExecutionFailedMessage, err.Error()),
+		))
 		return parsedPatch, err
 	}
 
 	parsedPatch = buffer.String()
+
+	r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeTemplateSucceed,
+		metav1.ConditionTrue,
+		ConditionReasonTemplateParsed,
+		ConditionReasonTemplateParsedMessage,
+	))
+
 	return parsedPatch, err
 }
 
 // PatchTarget call Kubernetes API to actually patch the resource
-func (r *PatchReconciler) PatchTarget(ctx context.Context, patch *reformav1alpha1.Patch) (err error) {
+func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reformav1alpha1.Patch) (err error) {
 
-	//sources, err := r.GetSources(ctx, patch)
-	//
-	//if err != nil {
-	//	log.Print("Algo ha pasado con los sources, pavo")
-	//}
-	//
-	//log.Print("SOURCES-----------------------")
-	//log.Print(sources.Items)
-	//log.Print("------------------------------")
-	//
-	//target, err := r.GetTarget(ctx, patch)
-	//
-	//if err != nil {
-	//	log.Print("Algo ha pasado con el target, pavo")
-	//}
-	//
-	//log.Print("TARGET-----------------------")
-	//log.Print(target)
-	//log.Print("------------------------------")
-
-	patchType, err := r.GetPatchType(ctx, patch)
-
+	err = r.CheckPatchType(patchManifest)
 	if err != nil {
-		log.Print("GetPatchType ------------------------------")
-		log.Print(patchType)
-		log.Print(err)
-		log.Print("GetPatchType END ------------------------------")
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
+			metav1.ConditionFalse,
+			ConditionReasonInvalidPatchType,
+			ConditionReasonInvalidPatchTypeMessage,
+		))
+		return err
 	}
 
-	parsedPatch, err := r.GetPatch(ctx, patch)
-
+	patch, err := r.GetPatch(ctx, patchManifest)
 	if err != nil {
-		log.Print("GetPatch ------------------------------")
-		log.Print(err)
-		log.Print("GetPatch END ------------------------------")
+		return err
 	}
 
-	log.Print("PATCH-----------------------")
-	log.Print(parsedPatch)
-	log.Print("------------------------------")
+	// Get the target to patch
+	target := &unstructured.Unstructured{}
+	target.SetGroupVersionKind(patchManifest.Spec.Target.GroupVersionKind())
+	err = r.Get(ctx, client.ObjectKey {
+		Namespace: patchManifest.Spec.Target.Namespace,
+		Name:      patchManifest.Spec.Target.Name,
+	}, target)
+	if err != nil {
+		return err
+	}
+
+	// Convert the YAML patch to JSON because, remember, Kubernetes use JSON internally
+	patchJSON, err := yamlsigs.YAMLToJSON([]byte(patch))
+	if err != nil {
+		return err
+	}
+
+	// Actually perform the patch against Kubernetes
+	err = r.Patch(ctx, target, client.RawPatch(patchManifest.Spec.PatchType, patchJSON))
+	if err != nil {
+		return err
+	}
+
+	log.Print("PatchTarget END ------------------------------")
 
 	return err
 }

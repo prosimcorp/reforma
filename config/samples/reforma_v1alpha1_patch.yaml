@@ -26,17 +26,10 @@ spec:
 
   template: |
     {{- $target := (index . 0) -}}
+
     {{- $source := (index . 1) -}}
 
-    {{/* Get the original flags of the target */}}
-    {{/* - $target_args := (index $target.spec.template.spec.containers 0).args - */}}
 
-    {{/* Flags for all the cloud providers */}}
-    {{/* - $target_args = append $target_args "--tcp-services-configmap=gitlab/ingress-nginx-tcp-services" - */}}
-
-    - op: replace
-      path: /spec/template/spec/containers/0/args
-      value:
-        {{- $source.metadata.name -}}
-        {{/* - $target_args | uniq | toYaml | nindent 4 - */}}
-
+    - op: add
+      path: /metadata/annotations/testiando
+      value: "{{- $source.data.primero -}}"

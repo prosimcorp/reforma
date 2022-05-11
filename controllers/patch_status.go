@@ -7,8 +7,8 @@ import (
 
 // https://github.com/external-secrets/external-secrets/blob/80545f4f183795ef193747fc959558c761b51c99/apis/externalsecrets/v1alpha1/externalsecret_types.go#L168
 const (
-	// ConditionTypeSourceSynced indicates that the source was synchronized or not
-	ConditionTypeSourceSynced = "SourceSynced"
+	// ConditionTypeResourcePatched indicates that the target was patched or not
+	ConditionTypeResourcePatched = "ResourcePatched"
 
 	// Source not found
 	ConditionReasonSourceNotFound        = "SourceNotFound"
@@ -18,16 +18,30 @@ const (
 	ConditionReasonTargetNotFound        = "TargetNotFound"
 	ConditionReasonTargetNotFoundMessage = "Target resource was not found"
 
-	//// Replication failed
-	//ConditionReasonSourceReplicationFailed        = "SourceReplicationFailed"
-	//ConditionReasonSourceReplicationFailedMessage = "Error replicating the source on targets"
+	ConditionReasonInvalidPatchType = "InvalidPatchType"
+	ConditionReasonInvalidPatchTypeMessage = "Patch type is not supported"
 
 	// Success
-	ConditionReasonSourceSynced        = "SourceSynced"
-	ConditionReasonSourceSyncedMessage = "Source was successfully synchronized"
+	ConditionReasonTargetPatched        = "TargetPatched"
+	ConditionReasonTargetPatchedMessage = "Target was successfully patched"
+
+	// ConditionTypeTemplateSucceed indicates that the templating stage was performed successfully
+	ConditionTypeTemplateSucceed = "TemplateSucceed"
+
+	// Template parsing failed
+	ConditionReasonTemplateParsingFailed        = "TemplateParsingFailed"
+	ConditionReasonTemplateParsingFailedMessage = "Golang returned: %s"
+
+	// Template execution failed
+	ConditionReasonTemplateExecutionFailed        = "TemplateExecutionFailed"
+	ConditionReasonTemplateExecutionFailedMessage = "Golang returned: %s"
+
+	// Success
+	ConditionReasonTemplateParsed        = "TemplateParsed"
+	ConditionReasonTemplateParsedMessage = "Templated was successfully parsed"
 )
 
-// NewPatchCondition a set of default options for creating a Replika Condition.
+// NewPatchCondition a set of default options for creating a Condition.
 func (r *PatchReconciler) NewPatchCondition(condType string, status metav1.ConditionStatus, reason, message string) *metav1.Condition {
 	return &metav1.Condition{
 		Type:               condType,
