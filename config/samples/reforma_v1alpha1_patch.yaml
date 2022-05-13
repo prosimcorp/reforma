@@ -3,9 +3,11 @@ kind: Patch
 metadata:
   name: patch-sample
 spec:
-  #periodical: true
-  #synchronizationTime: 10s
+  # Synchronization parameters
+  synchronization:
+    time: "5s"
 
+  # Sources to look for the data to make wonderful patches
   sources:
     - apiVersion: v1
       kind: ConfigMap
@@ -16,20 +18,21 @@ spec:
       name: cluster-info-tres
       namespace: default
 
+  # Target to apply patches to
   target:
     apiVersion: v1
     kind: ConfigMap
     name: cluster-info
     namespace: default
 
+  # You know, the patch type
   patchType: application/json-patch+json
 
+  # Template to craft the patch. TODO
   template: |
     {{- $target := (index . 0) -}}
-
     {{- $source := (index . 1) -}}
-
 
     - op: add
       path: /metadata/annotations/testiando
-      value: "{{- $source.data.primero -}}"
+      value: "{{- $source.metadata.name -}}"

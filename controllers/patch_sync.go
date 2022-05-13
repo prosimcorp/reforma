@@ -7,9 +7,9 @@ import (
 	"log"
 	"strings"
 	tmpl "text/template"
+	"time"
 
 	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
-
 
 	"github.com/Masterminds/sprig"
 	"gopkg.in/yaml.v3"
@@ -21,6 +21,8 @@ import (
 )
 
 const (
+	defaultSynchronizationTime = 15 * time.Second
+
 	// ErrorInvalidPatchTypeMessage error message for invalid values on 'patchType' parameter
 	ErrorInvalidPatchTypeMessage = "PatchType: invalid value. Choose one of the following: %s"
 )
@@ -41,6 +43,18 @@ func GetPatchTypesString() (types []string) {
 		types = append(types, string(str))
 	}
 	return types
+}
+
+// GetSynchronizationTime return the spec.synchronization.time as duration, or default time on failures
+func (r *PatchReconciler) GetSynchronizationTime(patchManifest *reformav1alpha1.Patch) (synchronizationTime time.Duration, err error) {
+	synchronizationTime, err = time.ParseDuration(patchManifest.Spec.Synchronization.Time)
+	if err != nil {
+		synchronizationTime = defaultSynchronizationTime
+		err = NewErrorf(parseSyncTimeError, patchManifest.Name)
+		return synchronizationTime, err
+	}
+
+	return synchronizationTime, err
 }
 
 // addSources fill the resources list from input parameters with the content of the sources
@@ -231,7 +245,7 @@ func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reform
 	// Get the target to patch
 	target := &unstructured.Unstructured{}
 	target.SetGroupVersionKind(patchManifest.Spec.Target.GroupVersionKind())
-	err = r.Get(ctx, client.ObjectKey {
+	err = r.Get(ctx, client.ObjectKey{
 		Namespace: patchManifest.Spec.Target.Namespace,
 		Name:      patchManifest.Spec.Target.Name,
 	}, target)

@@ -19,21 +19,21 @@ package controllers
 import (
 	"context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
+	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"time"
 )
 
 const (
+	defaultSyncTimeForExitWithError = 10 * time.Second
+
 	scheduleSynchronization     = "Schedule synchronization in: %s"
 	patchNotFoundError          = "Patch resource not found. Ignoring since object must be deleted."
 	patchRetrievalError         = "Error getting the Patch from the cluster"
-	targetsDeletionError        = "Unable to delete the targets"
 	patchFinalizersUpdateError  = "Failed to update finalizer of Patch: %s"
 	patchConditionUpdateError   = "Failed to update the condition on Patch: %s"
 	patchSyncTimeRetrievalError = "Can not get synchronization time from the Patch: %s"
@@ -45,12 +45,14 @@ const (
 // PatchReconciler reconciles a Patch object
 type PatchReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme   *runtime.Scheme
+	recorder record.EventRecorder
 }
 
 //+kubebuilder:rbac:groups=reforma.prosimcorp.com,resources=patches,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=reforma.prosimcorp.com,resources=patches/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=reforma.prosimcorp.com,resources=patches/finalizers,verbs=update
+//+kubebuilder:rbac:groups="",resources=secrets;configmaps,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -107,14 +109,24 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 		}
 	}()
 
-	// 6. The Patch CR already exist: manage the update
+	// 6. Schedule periodical request
+	RequeueTime, err := r.GetSynchronizationTime(patchManifest)
+	if err != nil {
+		LogInfof(ctx, patchSyncTimeRetrievalError, patchManifest.Name)
+		return result, err
+	}
+	result = ctrl.Result{
+		RequeueAfter: RequeueTime,
+	}
+
+	// 7. The Patch CR already exist: manage the update
 	err = r.PatchTarget(ctx, patchManifest)
 	if err != nil {
 		LogInfof(ctx, patchTargetError, patchManifest.Name)
 		return result, err
 	}
 
-	// 7. Success, update the status
+	// 8. Success, update the status
 	r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
 		metav1.ConditionTrue,
 		ConditionReasonTargetPatched,
@@ -129,6 +141,5 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 func (r *PatchReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&reformav1alpha1.Patch{}).
-		//Watches(&source.Channel{Source: r.GetStatusChangeChannel()}, &handler.EnqueueRequestForObject{}).
 		Complete(r)
 }

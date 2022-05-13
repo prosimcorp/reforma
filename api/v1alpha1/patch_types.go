@@ -22,10 +22,18 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
+// SynchronizationSpec defines the spec of the synchronization section of a Replika
+type SynchronizationSpec struct {
+	Time string `json:"time"`
+}
+
 // PatchSpec defines the desired state of Patch
 type PatchSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// SynchronizationSpec defines the behavior of synchronization
+	Synchronization SynchronizationSpec `json:"synchronization"`
 
 	Sources   []corev1.ObjectReference `json:"sources"`
 	Target    corev1.ObjectReference   `json:"target"`
@@ -43,7 +51,11 @@ type PatchStatus struct {
 }
 
 //+kubebuilder:object:root=true
+//+kubebuilder:resource:scope=Namespaced,categories={patches}
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type==\"ResourcePatched\")].status",description=""
+//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[?(@.type==\"ResourcePatched\")].reason",description=""
+//+kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp",description=""
 
 // Patch is the Schema for the patches API
 type Patch struct {

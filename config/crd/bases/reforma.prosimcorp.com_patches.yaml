@@ -9,13 +9,25 @@ metadata:
 spec:
   group: reforma.prosimcorp.com
   names:
+    categories:
+    - patches
     kind: Patch
     listKind: PatchList
     plural: patches
     singular: patch
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=="ResourcePatched")].status
+      name: Ready
+      type: string
+    - jsonPath: .status.conditions[?(@.type=="ResourcePatched")].reason
+      name: Status
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: Patch is the Schema for the patches API
@@ -102,6 +114,14 @@ spec:
                       type: string
                   type: object
                 type: array
+              synchronization:
+                description: SynchronizationSpec defines the behavior of synchronization
+                properties:
+                  time:
+                    type: string
+                required:
+                - time
+                type: object
               target:
                 description: 'ObjectReference contains enough information to let you
                   inspect or modify the referred object. --- New uses of this type
@@ -165,6 +185,7 @@ spec:
             required:
             - patchType
             - sources
+            - synchronization
             - target
             - template
             type: object

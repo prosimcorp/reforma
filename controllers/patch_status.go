@@ -18,7 +18,7 @@ const (
 	ConditionReasonTargetNotFound        = "TargetNotFound"
 	ConditionReasonTargetNotFoundMessage = "Target resource was not found"
 
-	ConditionReasonInvalidPatchType = "InvalidPatchType"
+	ConditionReasonInvalidPatchType        = "InvalidPatchType"
 	ConditionReasonInvalidPatchTypeMessage = "Patch type is not supported"
 
 	// Success
