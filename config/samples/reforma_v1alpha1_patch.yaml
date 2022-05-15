@@ -11,28 +11,29 @@ spec:
   sources:
     - apiVersion: v1
       kind: ConfigMap
-      name: cluster-info-dos
+      name: cluster-info
       namespace: default
     - apiVersion: v1
       kind: ConfigMap
-      name: cluster-info-tres
+      name: namespace-info
       namespace: default
 
   # Target to apply patches to
   target:
     apiVersion: v1
     kind: ConfigMap
-    name: cluster-info
+    name: my-deployment-something
     namespace: default
 
   # You know, the patch type
   patchType: application/json-patch+json
 
-  # Template to craft the patch. TODO
+  # Templating section is where you can be creative to craft a patch
+  # Basically, if you know Helm templating and Kustomize patches, do what you want
   template: |
     {{- $target := (index . 0) -}}
     {{- $source := (index . 1) -}}
 
     - op: add
-      path: /metadata/annotations/testiando
+      path: /metadata/annotations/cluster-name
       value: "{{- $source.metadata.name -}}"

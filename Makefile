@@ -18,7 +18,7 @@ SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
 .PHONY: all
-all: build
+all: test build docker-build kustomization-build
 
 ##@ General
 
@@ -77,6 +77,16 @@ docker-build: test ## Build docker image with the manager.
 docker-push: ## Push docker image with the manager.
 	docker push ${IMG}
 
+.PHONY: kustomization-build
+kustomization-build: manifests kustomize kubectl-slice ## Generate the manifests to package them later in the way you want.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	rm -rf deploy/*
+	mkdir -p deploy
+	$(KUSTOMIZE) build config/default > deploy/manifests.yaml
+	$(KUBECTL_SLICE) --input-file=deploy/manifests.yaml --output-dir=deploy --template="{{.kind|lower}}/{{.metadata.name|dottodash}}.yaml"
+	@rm deploy/manifests.yaml || true
+	cd deploy && $(KUSTOMIZE) create --autodetect --recursive
+
 ##@ Deployment
 
 ifndef ignore-not-found
@@ -114,6 +124,11 @@ ENVTEST = $(shell pwd)/bin/setup-envtest
 .PHONY: envtest
 envtest: ## Download envtest-setup locally if necessary.
 	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
+
+KUBECTL_SLICE = $(shell pwd)/bin/kubectl-slice
+.PHONY: kubectl-slice
+kubectl-slice: ## Download kubectl-slice locally if necessary.
+	$(call go-get-tool,$(KUBECTL_SLICE),github.com/patrickdappollonio/kubectl-slice@latest)
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
