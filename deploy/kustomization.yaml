@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- clusterrole/reforma-manager-role.yaml
+- clusterrole/reforma-metrics-reader.yaml
+- clusterrole/reforma-proxy-role.yaml
+- clusterrolebinding/reforma-manager-rolebinding.yaml
+- clusterrolebinding/reforma-proxy-rolebinding.yaml
+- configmap/reforma-manager-config.yaml
+- customresourcedefinition/patches-reforma-prosimcorp-com.yaml
+- deployment/reforma-controller-manager.yaml
+- namespace/reforma-system.yaml
+- role/reforma-leader-election-role.yaml
+- rolebinding/reforma-leader-election-rolebinding.yaml
+- service/reforma-controller-manager-metrics-service.yaml
+- serviceaccount/reforma-controller-manager.yaml

@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: reforma
+  name: reforma-leader-election-rolebinding
+  namespace: reforma-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: reforma-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: reforma-controller-manager
+  namespace: reforma-system
+

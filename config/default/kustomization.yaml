@@ -9,8 +9,9 @@ namespace: reforma-system
 namePrefix: reforma-
 
 # Labels to add to all resources and selectors.
-#commonLabels:
-#  someName: someValue
+commonLabels:
+  app.kubernetes.io/name: reforma
+  app.kubernetes.io/managed-by: kustomize
 
 bases:
 - ../crd

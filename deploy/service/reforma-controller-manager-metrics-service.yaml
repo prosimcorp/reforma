@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: reforma
+    control-plane: controller-manager
+  name: reforma-controller-manager-metrics-service
+  namespace: reforma-system
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  selector:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: reforma
+    control-plane: controller-manager
+

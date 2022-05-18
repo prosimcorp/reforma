@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: reforma
+  name: reforma-controller-manager
+  namespace: reforma-system
+
