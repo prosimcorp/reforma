@@ -1,23 +1,21 @@
 package controllers
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"log"
+
+	"bytes"
 	"strings"
-	tmpl "text/template"
+	"text/template"
 	"time"
 
 	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
 
-	"github.com/Masterminds/sprig"
-	"gopkg.in/yaml.v3"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	yamlsigs "sigs.k8s.io/yaml"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -127,37 +125,6 @@ func (r *PatchReconciler) GetResources(ctx context.Context, patchManifest *refor
 	return resources, err
 }
 
-// toYAML takes an interface, marshals it to yaml, and returns a string. It will
-// always return a string, even on marshal error (empty string)
-// Ref: https://github.com/helm/helm/blob/main/pkg/engine/funcs.go#L79-L90
-func toYAML(v interface{}) string {
-	data, err := yaml.Marshal(v)
-	if err != nil {
-		// Swallow errors inside a template.
-		return ""
-	}
-	return strings.TrimSuffix(string(data), "\n")
-}
-
-// fromYAML converts a YAML document into a map[string]interface{}
-// Ref: https://github.com/helm/helm/blob/main/pkg/engine/funcs.go#L92-L105
-func fromYAML(str string) map[string]interface{} {
-	m := map[string]interface{}{}
-
-	if err := yaml.Unmarshal([]byte(str), &m); err != nil {
-		m["Error"] = err.Error()
-	}
-	return m
-}
-
-// GetFunctionsMap return a map with equivalency between functions for inside templating and real Golang ones
-func (r *PatchReconciler) GetFunctionsMap() tmpl.FuncMap {
-	f := sprig.TxtFuncMap()
-	f["toYaml"] = toYAML
-	f["fromYaml"] = fromYAML
-	return f
-}
-
 // CheckPatchType check if the 'patchType' in the Path CR is available
 func (r *PatchReconciler) CheckPatchType(patchManifest *reformav1alpha1.Patch) (err error) {
 
@@ -190,7 +157,7 @@ func (r *PatchReconciler) GetPatch(ctx context.Context, patchManifest *reformav1
 	}
 
 	// Create a Template object from the given string
-	template, err := tmpl.New("main").Funcs(templateFunctionsMap).Parse(patchManifest.Spec.Template)
+	template, err := template.New("main").Funcs(templateFunctionsMap).Parse(patchManifest.Spec.Template)
 	if err != nil {
 		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeTemplateSucceed,
 			metav1.ConditionFalse,
@@ -254,7 +221,7 @@ func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reform
 	}
 
 	// Convert the YAML patch to JSON because, remember, Kubernetes use JSON internally
-	patchJSON, err := yamlsigs.YAMLToJSON([]byte(patch))
+	patchJSON, err := yaml.YAMLToJSON([]byte(patch))
 	if err != nil {
 		return err
 	}
@@ -264,8 +231,6 @@ func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reform
 	if err != nil {
 		return err
 	}
-
-	log.Print("PatchTarget END ------------------------------")
 
 	return err
 }

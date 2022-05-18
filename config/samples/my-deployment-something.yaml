@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-deployment-something
+  namespace: default
+data:
+  something: tochange

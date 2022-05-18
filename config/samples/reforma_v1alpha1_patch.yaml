@@ -13,6 +13,7 @@ spec:
       kind: ConfigMap
       name: cluster-info
       namespace: default
+
     - apiVersion: v1
       kind: ConfigMap
       name: namespace-info
@@ -32,7 +33,8 @@ spec:
   # Basically, if you know Helm templating and Kustomize patches, do what you want
   template: |
     {{- $target := (index . 0) -}}
-    {{- $source := (index . 1) -}}
+    {{- $source_one := (index . 1) -}}
+    {{- $source_two := (index . 2) -}}
 
     - op: add
       path: /metadata/annotations/cluster-name

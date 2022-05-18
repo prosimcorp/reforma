@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: namespace-info
+  namespace: default
+data:
+  environment: develop
+  team: squad-pokemon
+  name: your-subproject
