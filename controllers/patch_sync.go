@@ -110,6 +110,7 @@ func (r *PatchReconciler) GetResources(ctx context.Context, patchManifest *refor
 			ConditionReasonTargetNotFound,
 			ConditionReasonTargetNotFoundMessage,
 		))
+		return resources, err
 	}
 
 	// Fill the resources list with the sources
@@ -164,6 +165,11 @@ func (r *PatchReconciler) GetPatch(ctx context.Context, patchManifest *reformav1
 			ConditionReasonTemplateParsingFailed,
 			fmt.Sprintf(ConditionReasonTemplateParsingFailedMessage, err.Error()),
 		))
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
+			metav1.ConditionFalse,
+			ConditionReasonInvalidTemplate,
+			ConditionReasonInvalidTemplateMessage,
+		))
 		return parsedPatch, err
 	}
 
@@ -176,6 +182,11 @@ func (r *PatchReconciler) GetPatch(ctx context.Context, patchManifest *reformav1
 			metav1.ConditionFalse,
 			ConditionReasonTemplateExecutionFailed,
 			fmt.Sprintf(ConditionReasonTemplateExecutionFailedMessage, err.Error()),
+		))
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
+			metav1.ConditionFalse,
+			ConditionReasonInvalidTemplate,
+			ConditionReasonInvalidTemplateMessage,
 		))
 		return parsedPatch, err
 	}
@@ -229,6 +240,11 @@ func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reform
 	// Actually perform the patch against Kubernetes
 	err = r.Patch(ctx, target, client.RawPatch(patchManifest.Spec.PatchType, patchJSON))
 	if err != nil {
+		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
+			metav1.ConditionFalse,
+			ConditionReasonInvalidPatch,
+			ConditionReasonInvalidPatchMessage,
+		))
 		return err
 	}
 

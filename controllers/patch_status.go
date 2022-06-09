@@ -18,8 +18,17 @@ const (
 	ConditionReasonTargetNotFound        = "TargetNotFound"
 	ConditionReasonTargetNotFoundMessage = "Target resource was not found"
 
+	// Invalid patch type
 	ConditionReasonInvalidPatchType        = "InvalidPatchType"
 	ConditionReasonInvalidPatchTypeMessage = "Patch type is not supported"
+
+	// Template failed
+	ConditionReasonInvalidTemplate        = "InvalidTemplate"
+	ConditionReasonInvalidTemplateMessage = "Patch template is not valid. Deeper information inside the Patch status"
+
+	// Failure
+	ConditionReasonInvalidPatch        = "InvalidPatch"
+	ConditionReasonInvalidPatchMessage = "Patch is invalid"
 
 	// Success
 	ConditionReasonTargetPatched        = "TargetPatched"
@@ -38,7 +47,7 @@ const (
 
 	// Success
 	ConditionReasonTemplateParsed        = "TemplateParsed"
-	ConditionReasonTemplateParsedMessage = "Templated was successfully parsed"
+	ConditionReasonTemplateParsedMessage = "Template was successfully parsed"
 )
 
 // NewPatchCondition a set of default options for creating a Condition.

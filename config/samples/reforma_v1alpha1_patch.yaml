@@ -38,4 +38,4 @@ spec:
 
     - op: add
       path: /metadata/annotations/cluster-name
-      value: "{{- $source.metadata.name -}}"
+      value: "{{- $source_one.metadata.name -}}"
