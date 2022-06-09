@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	defaultSynchronizationTime = 15 * time.Second
+	// parseSyncTimeError error message for invalid value on 'synchronization' parameter
+	parseSyncTimeError = "Can not parse the synchronization time from patch: %s"
 
 	// ErrorInvalidPatchTypeMessage error message for invalid values on 'patchType' parameter
 	ErrorInvalidPatchTypeMessage = "PatchType: invalid value. Choose one of the following: %s"
@@ -47,7 +48,6 @@ func GetPatchTypesString() (types []string) {
 func (r *PatchReconciler) GetSynchronizationTime(patchManifest *reformav1alpha1.Patch) (synchronizationTime time.Duration, err error) {
 	synchronizationTime, err = time.ParseDuration(patchManifest.Spec.Synchronization.Time)
 	if err != nil {
-		synchronizationTime = defaultSynchronizationTime
 		err = NewErrorf(parseSyncTimeError, patchManifest.Name)
 		return synchronizationTime, err
 	}
