@@ -4,6 +4,6 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: reforma
-    control-plane: controller-manager
+    control-plane: reforma
   name: reforma-system
 

@@ -4,7 +4,7 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: reforma
-    control-plane: controller-manager
+    control-plane: reforma
   name: reforma-controller-manager
   namespace: reforma-system
 spec:
@@ -13,7 +13,7 @@ spec:
     matchLabels:
       app.kubernetes.io/managed-by: kustomize
       app.kubernetes.io/name: reforma
-      control-plane: controller-manager
+      control-plane: reforma
   template:
     metadata:
       annotations:
@@ -21,7 +21,7 @@ spec:
       labels:
         app.kubernetes.io/managed-by: kustomize
         app.kubernetes.io/name: reforma
-        control-plane: controller-manager
+        control-plane: reforma
     spec:
       containers:
       - args:
@@ -48,7 +48,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: prosimcorp/reforma:v0.1.0
+        image: prosimcorp/reforma:v0.1.1
         livenessProbe:
           httpGet:
             path: /healthz
