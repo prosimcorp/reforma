@@ -231,14 +231,19 @@ func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reform
 		return err
 	}
 
-	// Convert the YAML patch to JSON because, remember, Kubernetes use JSON internally
-	patchJSON, err := yaml.YAMLToJSON([]byte(patch))
-	if err != nil {
-		return err
+	//
+	parsedPatch := []byte(patch)
+
+	// Convert the YAML patch to JSON for client-side patches, remember, Kubernetes API expect JSON for them
+	if patchManifest.Spec.PatchType != types.ApplyPatchType {
+		parsedPatch, err = yaml.YAMLToJSON([]byte(patch))
+		if err != nil {
+			return err
+		}
 	}
 
 	// Actually perform the patch against Kubernetes
-	err = r.Patch(ctx, target, client.RawPatch(patchManifest.Spec.PatchType, patchJSON))
+	err = r.Patch(ctx, target, client.RawPatch(patchManifest.Spec.PatchType, parsedPatch))
 	if err != nil {
 		r.UpdatePatchCondition(patchManifest, r.NewPatchCondition(ConditionTypeResourcePatched,
 			metav1.ConditionFalse,
