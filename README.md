@@ -250,9 +250,16 @@ the process, the steps are described in the following recipe:
 
 ## How to collaborate
 
-This project is done on top of Kubebuilder, so read about that project before collaborating. Of course, we are open to
-external collaborations for this project. For doing it you must fork the repository, make your changes to the code and
-open a PR. The code will be reviewed and tested (always)
+This project is done on top of [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder), so read about that project 
+before collaborating. Of course, we are open to external collaborations for this project. For doing it you must fork the 
+repository, make your changes to the code and open a PR. The code will be reviewed and tested (always)
 
 > We are developers and hate bad code. For that reason we ask you the highest quality on each line of code to improve
 > this project on each iteration.
+
+
+## Special mention
+
+This project was done using IDEs from JetBrains. They helped us to develop faster, so we recommend them a lot! 🤓
+
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="150">
