@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package v1beta1
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -29,8 +29,6 @@ type SynchronizationSpec struct {
 
 // PatchSpec defines the desired state of Patch
 type PatchSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 
 	// SynchronizationSpec defines the behavior of synchronization
 	Synchronization SynchronizationSpec `json:"synchronization"`
@@ -43,8 +41,6 @@ type PatchSpec struct {
 
 // PatchStatus defines the observed state of Patch
 type PatchStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 
 	// Conditions represent the latest available observations of an object's state
 	Conditions []metav1.Condition `json:"conditions"`

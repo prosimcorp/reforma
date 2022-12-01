@@ -2,7 +2,7 @@ package controllers
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
+	reformav1beta1 "prosimcorp.com/reforma/api/v1beta1"
 )
 
 // https://github.com/external-secrets/external-secrets/blob/80545f4f183795ef193747fc959558c761b51c99/apis/externalsecrets/v1alpha1/externalsecret_types.go#L168
@@ -62,7 +62,7 @@ func (r *PatchReconciler) NewPatchCondition(condType string, status metav1.Condi
 }
 
 // GetPatchCondition returns the condition with the provided type.
-func (r *PatchReconciler) GetPatchCondition(patch *reformav1alpha1.Patch, condType string) *metav1.Condition {
+func (r *PatchReconciler) GetPatchCondition(patch *reformav1beta1.Patch, condType string) *metav1.Condition {
 
 	for i, v := range patch.Status.Conditions {
 		if v.Type == condType {
@@ -73,7 +73,7 @@ func (r *PatchReconciler) GetPatchCondition(patch *reformav1alpha1.Patch, condTy
 }
 
 // UpdatePatchCondition update or create a new condition inside the status of the CR
-func (r *PatchReconciler) UpdatePatchCondition(patch *reformav1alpha1.Patch, condition *metav1.Condition) {
+func (r *PatchReconciler) UpdatePatchCondition(patch *reformav1beta1.Patch, condition *metav1.Condition) {
 
 	// Get the condition
 	currentCondition := r.GetPatchCondition(patch, condition.Type)

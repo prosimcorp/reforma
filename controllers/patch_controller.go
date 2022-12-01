@@ -18,14 +18,15 @@ package controllers
 
 import (
 	"context"
+	"time"
+
+	reformav1beta1 "prosimcorp.com/reforma/api/v1beta1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/record"
-	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"time"
 )
 
 const (
@@ -45,8 +46,7 @@ const (
 // PatchReconciler reconciles a Patch object
 type PatchReconciler struct {
 	client.Client
-	Scheme   *runtime.Scheme
-	recorder record.EventRecorder
+	Scheme *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=reforma.prosimcorp.com,resources=patches,verbs=get;list;watch;create;update;patch;delete
@@ -57,10 +57,10 @@ type PatchReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.13.0/pkg/reconcile
 func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	//1. Get the content of the Patch
-	patchManifest := &reformav1alpha1.Patch{}
+	patchManifest := &reformav1beta1.Patch{}
 	err = r.Get(ctx, req.NamespacedName, patchManifest)
 
 	// 2. Check existence on the cluster
@@ -140,6 +140,6 @@ func (r *PatchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (resu
 // SetupWithManager sets up the controller with the Manager.
 func (r *PatchReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&reformav1alpha1.Patch{}).
+		For(&reformav1beta1.Patch{}).
 		Complete(r)
 }

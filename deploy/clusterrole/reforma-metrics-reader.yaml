@@ -2,8 +2,12 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
+    app.kubernetes.io/component: kube-rbac-proxy
+    app.kubernetes.io/created-by: reforma
+    app.kubernetes.io/instance: metrics-reader
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: reforma
+    app.kubernetes.io/part-of: reforma
   name: reforma-metrics-reader
 rules:
 - nonResourceURLs:
