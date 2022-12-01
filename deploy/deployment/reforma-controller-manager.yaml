@@ -2,8 +2,12 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
+    app.kubernetes.io/component: manager
+    app.kubernetes.io/created-by: reforma
+    app.kubernetes.io/instance: controller-manager
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: reforma
+    app.kubernetes.io/part-of: reforma
     control-plane: reforma
   name: reforma-controller-manager
   namespace: reforma-system
@@ -23,13 +27,29 @@ spec:
         app.kubernetes.io/name: reforma
         control-plane: reforma
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - arm64
+                - ppc64le
+                - s390x
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                - linux
       containers:
       - args:
         - --secure-listen-address=0.0.0.0:8443
         - --upstream=http://127.0.0.1:8080/
         - --logtostderr=true
         - --v=0
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
         name: kube-rbac-proxy
         ports:
         - containerPort: 8443
@@ -42,13 +62,18 @@ spec:
           requests:
             cpu: 5m
             memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
       - args:
         - --health-probe-bind-address=:8081
         - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
         command:
         - /manager
-        image: prosimcorp/reforma:v0.1.2
+        image: prosimcorp/reforma:v0.2.0
         livenessProbe:
           httpGet:
             path: /healthz
@@ -64,13 +89,16 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: 500m
+            cpu: 32m
             memory: 128Mi
           requests:
-            cpu: 10m
+            cpu: 16m
             memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
       securityContext:
         runAsNonRoot: true
       serviceAccountName: reforma-controller-manager

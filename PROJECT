@@ -11,6 +11,6 @@ resources:
   domain: prosimcorp.com
   group: reforma
   kind: Patch
-  path: prosimcorp.com/reforma/api/v1alpha1
-  version: v1alpha1
+  path: prosimcorp.com/reforma/api/v1beta1
+  version: v1beta1
 version: "3"

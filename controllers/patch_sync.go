@@ -9,7 +9,7 @@ import (
 	"text/template"
 	"time"
 
-	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
+	reformav1beta1 "prosimcorp.com/reforma/api/v1beta1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -45,7 +45,7 @@ func GetPatchTypesString() (types []string) {
 }
 
 // GetSynchronizationTime return the spec.synchronization.time as duration, or default time on failures
-func (r *PatchReconciler) GetSynchronizationTime(patchManifest *reformav1alpha1.Patch) (synchronizationTime time.Duration, err error) {
+func (r *PatchReconciler) GetSynchronizationTime(patchManifest *reformav1beta1.Patch) (synchronizationTime time.Duration, err error) {
 	synchronizationTime, err = time.ParseDuration(patchManifest.Spec.Synchronization.Time)
 	if err != nil {
 		err = NewErrorf(parseSyncTimeError, patchManifest.Name)
@@ -56,7 +56,7 @@ func (r *PatchReconciler) GetSynchronizationTime(patchManifest *reformav1alpha1.
 }
 
 // addSources fill the resources list from input parameters with the content of the sources
-func (r *PatchReconciler) addSources(ctx context.Context, patchManifest *reformav1alpha1.Patch, resources *[]map[string]interface{}) (err error) {
+func (r *PatchReconciler) addSources(ctx context.Context, patchManifest *reformav1beta1.Patch, resources *[]map[string]interface{}) (err error) {
 
 	// Fill the sources content, one by one
 	sourceObject := &unstructured.Unstructured{}
@@ -80,7 +80,7 @@ func (r *PatchReconciler) addSources(ctx context.Context, patchManifest *reforma
 }
 
 // addTarget fill the resources list from input parameters with the target object content
-func (r *PatchReconciler) addTarget(ctx context.Context, patchManifest *reformav1alpha1.Patch, resources *[]map[string]interface{}) (err error) {
+func (r *PatchReconciler) addTarget(ctx context.Context, patchManifest *reformav1beta1.Patch, resources *[]map[string]interface{}) (err error) {
 
 	// Get the target manifest
 	target := &unstructured.Unstructured{}
@@ -100,7 +100,7 @@ func (r *PatchReconciler) addTarget(ctx context.Context, patchManifest *reformav
 }
 
 // GetResources return a JSON compatible list of objects with the target and the sources
-func (r *PatchReconciler) GetResources(ctx context.Context, patchManifest *reformav1alpha1.Patch) (resources []map[string]interface{}, err error) {
+func (r *PatchReconciler) GetResources(ctx context.Context, patchManifest *reformav1beta1.Patch) (resources []map[string]interface{}, err error) {
 
 	// Fill the resources list with the target
 	err = r.addTarget(ctx, patchManifest, &resources)
@@ -127,7 +127,7 @@ func (r *PatchReconciler) GetResources(ctx context.Context, patchManifest *refor
 }
 
 // CheckPatchType check if the 'patchType' in the Path CR is available
-func (r *PatchReconciler) CheckPatchType(patchManifest *reformav1alpha1.Patch) (err error) {
+func (r *PatchReconciler) CheckPatchType(patchManifest *reformav1beta1.Patch) (err error) {
 
 	for _, AvailabePatchType := range AvailabePatchTypes {
 		if AvailabePatchType == patchManifest.Spec.PatchType {
@@ -146,7 +146,7 @@ func (r *PatchReconciler) CheckPatchType(patchManifest *reformav1alpha1.Patch) (
 }
 
 // GetPatch return the patch string already prepared to call the Kubernetes API
-func (r *PatchReconciler) GetPatch(ctx context.Context, patchManifest *reformav1alpha1.Patch) (parsedPatch string, err error) {
+func (r *PatchReconciler) GetPatch(ctx context.Context, patchManifest *reformav1beta1.Patch) (parsedPatch string, err error) {
 
 	// Map useful sprig functions to give superpower to the users
 	templateFunctionsMap := r.GetFunctionsMap()
@@ -203,7 +203,7 @@ func (r *PatchReconciler) GetPatch(ctx context.Context, patchManifest *reformav1
 }
 
 // PatchTarget call Kubernetes API to actually patch the resource
-func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reformav1alpha1.Patch) (err error) {
+func (r *PatchReconciler) PatchTarget(ctx context.Context, patchManifest *reformav1beta1.Patch) (err error) {
 
 	err = r.CheckPatchType(patchManifest)
 	if err != nil {

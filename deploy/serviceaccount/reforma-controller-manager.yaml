@@ -2,8 +2,12 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:
+    app.kuberentes.io/instance: controller-manager
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: reforma
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: reforma
+    app.kubernetes.io/part-of: reforma
   name: reforma-controller-manager
   namespace: reforma-system
 
