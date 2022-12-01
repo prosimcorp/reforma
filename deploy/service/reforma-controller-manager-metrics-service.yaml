@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: reforma
     app.kubernetes.io/part-of: reforma
-    control-plane: controller-manager
+    control-plane: reforma
   name: reforma-controller-manager-metrics-service
   namespace: reforma-system
 spec:
@@ -20,5 +20,5 @@ spec:
   selector:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/name: reforma
-    control-plane: controller-manager
+    control-plane: reforma
 
