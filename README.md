@@ -117,7 +117,7 @@ ConfigMap resource:
 Now use a Patch CR to patch the ServiceAccount:
 
 ```yaml
-apiVersion: reforma.prosimcorp.com/v1alpha1
+apiVersion: reforma.prosimcorp.com/v1beta1
 kind: Patch
 metadata:
    name: patch-external-dns-sa
@@ -173,7 +173,7 @@ by the sources (they can be many). This list of objects is available inside the 
 
 This means that the objects can be accessed or stored in variables in the following way:
 ```yaml
-apiVersion: reforma.prosimcorp.com/v1alpha1
+apiVersion: reforma.prosimcorp.com/v1beta1
 kind: Patch
 metadata:
   name: accessing-objects-sample
