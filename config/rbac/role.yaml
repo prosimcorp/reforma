@@ -2,7 +2,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
   name: manager-role
 rules:
 - apiGroups:
@@ -40,6 +39,32 @@ rules:
   - reforma.prosimcorp.com
   resources:
   - patches/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches/status
   verbs:
   - get
   - patch

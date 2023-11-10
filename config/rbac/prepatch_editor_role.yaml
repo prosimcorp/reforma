@@ -1,0 +1,31 @@
+# permissions for end users to edit prepatches.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: prepatch-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: reforma
+    app.kubernetes.io/part-of: reforma
+    app.kubernetes.io/managed-by: kustomize
+  name: prepatch-editor-role
+rules:
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches/status
+  verbs:
+  - get

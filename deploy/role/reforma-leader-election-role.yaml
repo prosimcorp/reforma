@@ -6,10 +6,10 @@ metadata:
     app.kubernetes.io/created-by: reforma
     app.kubernetes.io/instance: leader-election-role
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: reforma
+    app.kubernetes.io/name: role
     app.kubernetes.io/part-of: reforma
   name: reforma-leader-election-role
-  namespace: reforma-system
+  namespace: reforma
 rules:
 - apiGroups:
   - ""
@@ -42,4 +42,3 @@ rules:
   verbs:
   - create
   - patch
-

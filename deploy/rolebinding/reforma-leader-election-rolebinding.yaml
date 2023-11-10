@@ -6,10 +6,10 @@ metadata:
     app.kubernetes.io/created-by: reforma
     app.kubernetes.io/instance: leader-election-rolebinding
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: reforma
+    app.kubernetes.io/name: rolebinding
     app.kubernetes.io/part-of: reforma
   name: reforma-leader-election-rolebinding
-  namespace: reforma-system
+  namespace: reforma
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -17,5 +17,4 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: reforma-controller-manager
-  namespace: reforma-system
-
+  namespace: reforma

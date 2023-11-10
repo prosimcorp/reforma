@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/created-by: reforma
     app.kubernetes.io/instance: metrics-reader
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: reforma
+    app.kubernetes.io/name: clusterrole
     app.kubernetes.io/part-of: reforma
   name: reforma-metrics-reader
 rules:
@@ -14,4 +14,3 @@ rules:
   - /metrics
   verbs:
   - get
-

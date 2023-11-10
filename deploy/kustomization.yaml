@@ -7,8 +7,9 @@ resources:
 - clusterrolebinding/reforma-manager-rolebinding.yaml
 - clusterrolebinding/reforma-proxy-rolebinding.yaml
 - customresourcedefinition/patches-reforma-prosimcorp-com.yaml
+- customresourcedefinition/prepatches-reforma-prosimcorp-com.yaml
 - deployment/reforma-controller-manager.yaml
-- namespace/reforma-system.yaml
+- namespace/reforma.yaml
 - role/reforma-leader-election-role.yaml
 - rolebinding/reforma-leader-election-rolebinding.yaml
 - service/reforma-controller-manager-metrics-service.yaml

@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- reforma_v1alpha1_prepatch.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples

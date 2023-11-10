@@ -6,70 +6,25 @@ metadata:
     app.kubernetes.io/created-by: reforma
     app.kubernetes.io/instance: controller-manager
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: reforma
+    app.kubernetes.io/name: deployment
     app.kubernetes.io/part-of: reforma
     control-plane: reforma
   name: reforma-controller-manager
-  namespace: reforma-system
+  namespace: reforma
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/managed-by: kustomize
-      app.kubernetes.io/name: reforma
       control-plane: reforma
   template:
     metadata:
       annotations:
         kubectl.kubernetes.io/default-container: manager
       labels:
-        app.kubernetes.io/managed-by: kustomize
-        app.kubernetes.io/name: reforma
         control-plane: reforma
     spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/arch
-                operator: In
-                values:
-                - amd64
-                - arm64
-                - ppc64le
-                - s390x
-              - key: kubernetes.io/os
-                operator: In
-                values:
-                - linux
       containers:
       - args:
-        - --secure-listen-address=0.0.0.0:8443
-        - --upstream=http://127.0.0.1:8080/
-        - --logtostderr=true
-        - --v=0
-        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.13.0
-        name: kube-rbac-proxy
-        ports:
-        - containerPort: 8443
-          name: https
-          protocol: TCP
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 5m
-            memory: 64Mi
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-            - ALL
-      - args:
-        - --health-probe-bind-address=:8081
-        - --metrics-bind-address=127.0.0.1:8080
         - --leader-elect
         command:
         - /manager
@@ -89,10 +44,10 @@ spec:
           periodSeconds: 10
         resources:
           limits:
-            cpu: 32m
+            cpu: 500m
             memory: 128Mi
           requests:
-            cpu: 16m
+            cpu: 10m
             memory: 64Mi
         securityContext:
           allowPrivilegeEscalation: false
@@ -103,4 +58,3 @@ spec:
         runAsNonRoot: true
       serviceAccountName: reforma-controller-manager
       terminationGracePeriodSeconds: 10
-

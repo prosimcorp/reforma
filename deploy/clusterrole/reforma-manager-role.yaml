@@ -1,10 +1,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
-  labels:
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: reforma
   name: reforma-manager-role
 rules:
 - apiGroups:
@@ -46,4 +42,29 @@ rules:
   - get
   - patch
   - update
-
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - reforma.prosimcorp.com
+  resources:
+  - prepatches/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -6,11 +6,11 @@ metadata:
     app.kubernetes.io/created-by: reforma
     app.kubernetes.io/instance: controller-manager-metrics-service
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: reforma
+    app.kubernetes.io/name: service
     app.kubernetes.io/part-of: reforma
     control-plane: reforma
   name: reforma-controller-manager-metrics-service
-  namespace: reforma-system
+  namespace: reforma
 spec:
   ports:
   - name: https
@@ -18,7 +18,4 @@ spec:
     protocol: TCP
     targetPort: https
   selector:
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: reforma
     control-plane: reforma
-
