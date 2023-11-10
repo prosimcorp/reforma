@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/created-by: reforma
     app.kubernetes.io/instance: manager-rolebinding
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: clusterrolebinding
+    app.kubernetes.io/name: reforma
     app.kubernetes.io/part-of: reforma
   name: reforma-manager-rolebinding
 roleRef:

@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/created-by: reforma
     app.kubernetes.io/instance: leader-election-rolebinding
     app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/name: rolebinding
+    app.kubernetes.io/name: reforma
     app.kubernetes.io/part-of: reforma
   name: reforma-leader-election-rolebinding
   namespace: reforma

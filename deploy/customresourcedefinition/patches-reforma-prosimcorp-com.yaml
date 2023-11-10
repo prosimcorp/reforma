@@ -3,6 +3,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: reforma
   name: patches.reforma.prosimcorp.com
 spec:
   group: reforma.prosimcorp.com
