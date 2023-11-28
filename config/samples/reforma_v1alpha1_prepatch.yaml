@@ -1,12 +1,43 @@
+# DISCLAIMER: THIS RESOURCE IS A WORK IN PROGRESS.
+# DON'T USE IT AS IT WON'T WORK YET
 apiVersion: reforma.prosimcorp.com/v1alpha1
 kind: Prepatch
 metadata:
-  labels:
-    app.kubernetes.io/name: prepatch
-    app.kubernetes.io/instance: prepatch-sample
-    app.kubernetes.io/part-of: reforma
-    app.kubernetes.io/managed-by: kustomize
-    app.kubernetes.io/created-by: reforma
   name: prepatch-sample
 spec:
-  # TODO(user): Add fields here
+
+  #
+  applyOnEvent:
+    - create
+    - update
+    - delete
+
+  # Sources to look for the data to make wonderful patches
+  sources:
+    - apiVersion: v1
+      kind: ConfigMap
+      name: cluster-info
+      namespace: default
+
+    - apiVersion: v1
+      kind: ConfigMap
+      name: namespace-info
+      namespace: default
+
+  # Target to apply patches to
+  target:
+    apiVersion: v1
+    kind: ConfigMap
+    name: my-deployment-something
+    namespace: default
+
+  # Templating section is where you can be creative to craft a patch
+  # Basically, if you know Helm templating and Kustomize patches, do what you want
+  template: |
+    {{- $target := (index . 0) -}}
+    {{- $source_one := (index . 1) -}}
+    {{- $source_two := (index . 2) -}}
+
+    - op: add
+      path: /metadata/annotations/cluster-name
+      value: "{{- $source_one.metadata.name -}}"

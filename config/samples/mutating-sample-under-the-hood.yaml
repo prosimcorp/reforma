@@ -1,0 +1,39 @@
+# Ref: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#matching-requests-rules
+# Ref: https://kubernetes.io/docs/reference/using-api/cel/
+
+# DISCLAIMER: THIS RESOURCE IS A WORK IN PROGRESS.
+# DON'T USE IT AS IT WON'T WORK YET
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  finalizers:
+    - prepatch-ref-1
+    - prepatch-ref-2
+
+webhooks:
+  - name: my-webhook.example.com
+    rules:
+      # TARGET + OPERACION => PREPATCHES(TARGET, OPERACION)
+      - operations: ["CREATE"]
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["*"]
+        scope: "*"
+
+    # Ref: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/#request
+    matchConditions:
+      - name: 'select-only-target-resource'
+        expression: '(request.name == "deployment-name" && request.namespace == "namespace-name")'
+
+    clientConfig:
+      url: "https://my-webhook.example.com:9443/my-webhook-path"
+      #caBundle: <CA_BUNDLE>
+      #service:
+      #  namespace: my-service-namespace
+      #  name: my-service-name
+      #  path: /my-path
+      #  port: 1234
+
+    admissionReviewVersions: ["v1"]
+    sideEffects: NoneOnDryRun
+    timeoutSeconds: 5
