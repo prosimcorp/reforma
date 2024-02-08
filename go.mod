@@ -1,7 +1,7 @@
 module prosimcorp.com/reforma
 
 go 1.20
-
+// find / -executable -name go
 require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/Masterminds/sprig v2.22.0+incompatible

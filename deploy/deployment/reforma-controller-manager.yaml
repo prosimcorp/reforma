@@ -32,7 +32,7 @@ spec:
         - --leader-elect
         command:
         - /manager
-        image: prosimcorp/reforma:v0.3.0
+        image: prosimcorp/reforma:v0.3.2
         livenessProbe:
           httpGet:
             path: /healthz

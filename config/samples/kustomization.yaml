@@ -1,4 +1,14 @@
-## Append samples of your project ##
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
-- reforma_v1alpha1_prepatch.yaml
+# Source resources
+- configMap-cluster-info.yaml
+- configMap-namespace-info.yaml
+
+# Target resource
+- configMap-target.yaml
+
+# Patch example
+- reforma_v1beta1_patch.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples

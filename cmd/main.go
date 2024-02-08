@@ -32,7 +32,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	reformav1alpha1 "prosimcorp.com/reforma/api/v1alpha1"
 	"prosimcorp.com/reforma/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
@@ -46,7 +45,6 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(reformav1beta1.AddToScheme(scheme))
-	utilruntime.Must(reformav1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -95,13 +93,6 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Patch")
-		os.Exit(1)
-	}
-	if err = (&controller.PrepatchReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Prepatch")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

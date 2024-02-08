@@ -3,7 +3,6 @@
 # It should be run by config/default
 resources:
 - bases/reforma.prosimcorp.com_patches.yaml
-- bases/reforma.prosimcorp.com_prepatches.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patches:
