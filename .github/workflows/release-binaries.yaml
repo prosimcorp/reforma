@@ -52,6 +52,8 @@ jobs:
           go_version_raw=$(grep "^go " go.mod | awk '{print $2}')
           echo "go_version=${go_version_raw}" >> "$GITHUB_OUTPUT"
 
+      # Find the path for main.go file as recently golang project
+      # structure was finally standardized
       - name: Determine main.go path
         id: find_main_go
         run: |
@@ -59,6 +61,17 @@ jobs:
             echo "main_go_path=./" >> "$GITHUB_OUTPUT"
           else
             echo "main_go_path=./cmd/" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Omit the LICENSE file only for the very first release.
+      # This step is only to manage some technical debt we caused in the beginning.
+      - name: Find release extra files
+        id: find_release_extra_files
+        run: |
+          if [ -f "./LICENSE" ]; then
+            echo "release_extra_files='LICENSE README.md'" >> "$GITHUB_OUTPUT"
+          else
+            echo "release_extra_files='README.md'" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: wangyoucao577/go-release-action@v1.31
@@ -71,4 +84,4 @@ jobs:
           binary_name: "reforma"
           release_tag: ${{ inputs.release }}
           overwrite: true
-          extra_files: LICENSE README.md
+          extra_files: "${{ steps.find_release_extra_files.outputs.release_extra_files }}"
