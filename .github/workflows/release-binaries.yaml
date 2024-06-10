@@ -49,8 +49,17 @@ jobs:
       - name: Read Go version from go.mod
         id: read_go_version
         run: |
-          go_version=$(grep "^go " go.mod | awk '{print $2}')
-          echo "GO_VERSION=${go_version}" >> "$GITHUB_OUTPUT"
+          go_version_raw=$(grep "^go " go.mod | awk '{print $2}')
+          echo "go_version=${go_version_raw}" >> "$GITHUB_OUTPUT"
+
+      - name: Determine main.go path
+        id: find_main_go
+        run: |
+          if [ -f "./main.go" ]; then
+            echo "main_go_path=./" >> "$GITHUB_OUTPUT"
+          else
+            echo "main_go_path=./cmd/" >> "$GITHUB_OUTPUT"
+          fi
 
       - uses: wangyoucao577/go-release-action@v1.31
         with:
@@ -58,7 +67,7 @@ jobs:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
           goversion: "${{ steps.read_go_version.outputs.go_version }}"
-          project_path: "./cmd/"
+          project_path: "${{ steps.find_main_go.outputs.main_go_path }}"
           binary_name: "reforma"
           release_tag: ${{ inputs.release }}
           overwrite: true
