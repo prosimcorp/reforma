@@ -31,13 +31,33 @@ jobs:
           - goarch: arm64
             goos: windows
     steps:
+      - id: read_tag
+        name: Read release tag name (mostly vx.x.x)
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            export TAG="${{ github.ref_name }}"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            export TAG="${{ inputs.release }}"
+          fi
+
+          echo "release_tag=${TAG}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.read_tag.outputs.release_tag }}
+
+      - name: Read Go version from go.mod
+        id: read_go_version
+        run: |
+          go_version=$(grep "^go " go.mod | awk '{print $2}')
+          echo "GO_VERSION=${go_version}" >> "$GITHUB_OUTPUT"
+
       - uses: wangyoucao577/go-release-action@v1.31
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "https://dl.google.com/go/go1.19.13.linux-amd64.tar.gz"
+          goversion: "${{ steps.read_go_version.outputs.go_version }}"
           project_path: "./cmd/"
           binary_name: "reforma"
           release_tag: ${{ inputs.release }}
