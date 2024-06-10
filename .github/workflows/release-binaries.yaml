@@ -79,7 +79,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "${{ steps.read_go_version.outputs.go_version }}"
+          #goversion: "${{ steps.read_go_version.outputs.go_version }}"
+          goversion: "https://dl.google.com/go/go${{ steps.read_go_version.outputs.go_version }}.linux-amd64.tar.gz"
           project_path: "${{ steps.find_main_go.outputs.main_go_path }}"
           binary_name: "reforma"
           release_tag: ${{ inputs.release }}
