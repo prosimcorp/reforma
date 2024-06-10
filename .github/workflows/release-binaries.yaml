@@ -1,0 +1,45 @@
+name: Compile into binaries
+
+on:
+  release:
+    types: [created]
+
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Release tag where to create the binaries (as SemVer vX.X.X)'
+        required: true
+        default: v0.1.0
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel:
+        # linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
+        goos: [linux, windows, darwin]
+        goarch: ["386", amd64, arm64]
+        exclude:
+          - goarch: "386"
+            goos: darwin
+          - goarch: arm64
+            goos: windows
+    steps:
+      - uses: actions/checkout@v3
+      - uses: wangyoucao577/go-release-action@v1.31
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          goversion: "https://dl.google.com/go/go1.19.13.linux-amd64.tar.gz"
+          project_path: "./"
+          binary_name: "reforma"
+          release_tag: ${{ inputs.release }}
+          overwrite: true
+          extra_files: LICENSE README.md

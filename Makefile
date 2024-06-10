@@ -128,6 +128,13 @@ kustomization-build: manifests kustomize kubectl-slice ## Generate the manifests
 	@rm deploy/manifests.yaml || true
 	cd deploy && $(KUSTOMIZE) create --autodetect --recursive
 
+.PHONY: bundle-build
+bundle-build: manifests kustomize ## Generate the manifests bundle to package them later in the way you want.
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	rm -rf deploy/*
+	mkdir -p deploy
+	$(KUSTOMIZE) build config/default > deploy/bundle.yaml
+
 ##@ Deployment
 
 ifndef ignore-not-found
