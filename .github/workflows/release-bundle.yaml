@@ -20,37 +20,48 @@ jobs:
     name: Release Kubernetes manifests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Read Go version from go.mod
-        id: read_go_version
-        run: |
-          go_version=$(grep "^go " go.mod | awk '{print $2}')
-          echo "GO_VERSION=${go_version}" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-go@v5
-        env:
-          GO_VERSION: ${{ steps.read_go_version.outputs.go_version }}
-        with:
-          go-version: '${{ steps.read_go_version.outputs.go_version }}'
-          check-latest: true
-      - id: build
-        name: Build TODO
+      - id: read_tag
+        name: Read release tag name (mostly vx.x.x)
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
             export TAG="${{ github.ref_name }}"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             export TAG="${{ inputs.release }}"
           fi
-          
+
           echo "release_tag=${TAG}" >> "$GITHUB_OUTPUT"
-          
-          export IMG="ghcr.io/$GITHUB_REPOSITORY:$TAG"
+
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.read_tag.outputs.release_tag }}
+
+      - name: Read Go version from go.mod
+        id: read_go_version
+        run: |
+          go_version=$(grep "^go " go.mod | awk '{print $2}')
+          echo "GO_VERSION=${go_version}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-go@v5
+        env:
+          GO_VERSION: ${{ steps.read_go_version.outputs.go_version }}
+        with:
+          go-version: '${{ steps.read_go_version.outputs.go_version }}'
+          check-latest: true
+
+      - id: build
+        name: Build manifests bundle
+        env:
+          RELEASE_TAG: ${{ steps.read_tag.outputs.release_tag }}
+        run: |
+          export IMG="ghcr.io/$GITHUB_REPOSITORY:$RELEASE_TAG"
           make bundle-build
-      - name: Release
+
+      - name: Attach bundle to the release
         uses: softprops/action-gh-release@v2
         env:
-          RELEASE_TAG: ${{ steps.build.outputs.release_tag }}
+          RELEASE_TAG: ${{ steps.read_tag.outputs.release_tag }}
         with:
-          tag_name: ${{ steps.build.outputs.release_tag }}
+          tag_name: ${{ steps.read_tag.outputs.release_tag }}
           body: ""
           files: |
             deploy/bundle.yaml
