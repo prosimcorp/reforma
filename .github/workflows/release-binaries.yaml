@@ -38,7 +38,7 @@ jobs:
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
           goversion: "https://dl.google.com/go/go1.19.13.linux-amd64.tar.gz"
-          project_path: "./"
+          project_path: "./cmd/"
           binary_name: "reforma"
           release_tag: ${{ inputs.release }}
           overwrite: true
