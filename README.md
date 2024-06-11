@@ -38,7 +38,7 @@ the tag of the version you want to deploy as follows:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- https://github.com/prosimcorp/reforma/releases/download/v0.3.2/bundle.yaml
+- https://github.com/prosimcorp/reforma/releases/download/v0.4.0/bundle.yaml
 ```
 
 > 🧚🏼 **Hey, listen! If you prefer to deploy using Helm, go to the [Helm registry](https://github.com/prosimcorp/helm-charts)**
@@ -91,7 +91,7 @@ kind: Kustomization
 namespace: reforma
 
 resources:
-   - https://github.com/prosimcorp/reforma/releases/download/v0.3.2/bundle.yaml
+   - https://github.com/prosimcorp/reforma/releases/download/v0.4.0/bundle.yaml
    
    # Add your custom resources
    - clusterRole-reforma-custom-resources.yaml
