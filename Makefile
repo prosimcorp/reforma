@@ -118,20 +118,9 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 	- $(CONTAINER_TOOL) buildx rm project-v3-builder
 	rm Dockerfile.cross
 
-.PHONY: kustomization-build
-kustomization-build: manifests kustomize kubectl-slice ## Generate the manifests to package them later in the way you want.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	rm -rf deploy/*
-	mkdir -p deploy
-	$(KUSTOMIZE) build config/default > deploy/manifests.yaml
-	$(KUBECTL_SLICE) --input-file=deploy/manifests.yaml --output-dir=deploy --template="{{.kind|lower}}/{{.metadata.name|dottodash}}.yaml"
-	@rm deploy/manifests.yaml || true
-	cd deploy && $(KUSTOMIZE) create --autodetect --recursive
-
 .PHONY: bundle-build
 bundle-build: manifests kustomize ## Generate the manifests bundle to package them later in the way you want.
 	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
-	rm -rf deploy/*
 	mkdir -p deploy
 	$(KUSTOMIZE) build config/default > deploy/bundle.yaml
 
