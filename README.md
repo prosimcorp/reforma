@@ -1,5 +1,9 @@
 # Reforma
 
+> **ATTENTION:** From v0.4.0+ bundled Kubernetes deployment manifests are built and uploaded to the releases. 
+> We do this to keep them atomic between versions. Due to this, `deploy` directory will be removed from repository. 
+> Please, read [related section](#deployment)
+
 ## Description
 Kubernetes operator to patch resources with information from other resources
 
@@ -34,8 +38,10 @@ the tag of the version you want to deploy as follows:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- https://github.com/prosimcorp/reforma//deploy/?ref=main
+- https://github.com/prosimcorp/reforma/releases/download/v0.3.2/bundle.yaml
 ```
+
+> 🧚🏼 **Hey, listen! If you prefer to deploy using Helm, go to the [Helm registry](https://github.com/prosimcorp/helm-charts)**
 
 ## RBAC
 
@@ -85,7 +91,7 @@ kind: Kustomization
 namespace: reforma
 
 resources:
-   - https://github.com/prosimcorp/reforma//deploy/?ref=main
+   - https://github.com/prosimcorp/reforma/releases/download/v0.3.2/bundle.yaml
    
    # Add your custom resources
    - clusterRole-reforma-custom-resources.yaml
@@ -233,7 +239,7 @@ the process, the steps are described in the following recipe:
 
     ```console
     export VERSION="0.0.1"
-    export IMG="prosimcorp/reforma:v$VERSION"
+    export IMG="ghcr.io/prosimcorp/reforma:v$VERSION"
     ```
 
 3. Generate and push the Docker image (published on Docker Hub).
@@ -245,7 +251,7 @@ the process, the steps are described in the following recipe:
 4. Generate the manifests for deployments using Kustomize
 
    ```console
-    make kustomization-build
+    make bundle-build
     ```
 
 ## How to collaborate
