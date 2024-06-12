@@ -66,7 +66,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - id: build
-        name: Build manifests bundle
+        name: Build and push Docker images
         env:
           RELEASE_TAG: ${{ steps.read_tag.outputs.release_tag }}
         run: |
