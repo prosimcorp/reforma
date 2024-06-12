@@ -71,4 +71,4 @@ jobs:
           RELEASE_TAG: ${{ steps.read_tag.outputs.release_tag }}
         run: |
           export IMG="ghcr.io/$GITHUB_REPOSITORY:$RELEASE_TAG"
-          docker-buildx
+          make docker-buildx
