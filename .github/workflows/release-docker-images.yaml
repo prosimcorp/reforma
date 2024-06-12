@@ -45,7 +45,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '${{ steps.read_go_version.outputs.go_version }}'
-          check-latest: true
 
       - name: Set up QEMU
         id: qemu
