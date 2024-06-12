@@ -69,5 +69,12 @@ jobs:
         env:
           RELEASE_TAG: ${{ steps.read_tag.outputs.release_tag }}
         run: |
-          export IMG="ghcr.io/$GITHUB_REPOSITORY:$RELEASE_TAG"
-          make docker-buildx
+          export IMG="ghcr.io/$GITHUB_REPOSITORY:$RELEASE_TAG"        
+  
+          if grep -q '^docker-buildx:' Makefile; then
+            make docker-buildx
+          else
+            make docker-build
+            make docker-push
+          fi
+
