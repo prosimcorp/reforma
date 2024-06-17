@@ -1,5 +1,14 @@
 # Reforma
 
+![GitHub Release](https://img.shields.io/github/v/release/prosimcorp/reforma)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/prosimcorp/reforma)
+[![Go Report Card](https://goreportcard.com/badge/github.com/prosimcorp/reforma)](https://goreportcard.com/report/github.com/prosimcorp/reforma)
+![image pulls](https://img.shields.io/badge/+2k-brightgreen?label=image%20pulls)
+![GitHub License](https://img.shields.io/github/license/prosimcorp/reforma)
+
+![GitHub User's stars](https://img.shields.io/github/stars/prosimcorp?label=Prosimcorp%20Stars)
+![GitHub followers](https://img.shields.io/github/followers/prosimcorp?label=Prosimcorp%20Followers)
+
 > **ATTENTION:** From v0.4.0+ bundled Kubernetes deployment manifests are built and uploaded to the releases. 
 > We do this to keep them atomic between versions. Due to this, `deploy` directory will be removed from repository. 
 > Please, read [related section](#deployment)
